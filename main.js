@@ -20,7 +20,7 @@ const client = new Client({
 client.on('qr', (qr) => {
     // Generate and scan this code with your phone
     console.log('QR RECEIVED', qr);
-    // qrcode.generate(qr, { small: true })
+    qrcode.generate(qr, { small: true })
     globals.qrCode = qr
 });
 
@@ -55,7 +55,7 @@ app.get('/api/send-message', async (req, res) => {
             if (number_details) {
                 const response = await client.sendMessage(number_details._serialized, text)
                 console.log('Response of sending: ', response)
-                res.json({ password, phone, chatID, text, number_details })
+                res.json({ message: 'Success' })
             } else {
                 throw new Error('Mobile number is not registered')
             }
@@ -64,7 +64,6 @@ app.get('/api/send-message', async (req, res) => {
         }
     } catch (ex) {
         console.error(`Send message ex: `, ex);
-
         res.json(ex?.message)
     }
 })
