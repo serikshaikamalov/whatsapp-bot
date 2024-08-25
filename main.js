@@ -14,7 +14,8 @@ const qrcode = require('qrcode-terminal')
 
 const client = new Client({
     puppeteer: {
-        headless: true
+        headless: true,
+        args: ["--no-sandbox"]
     },
     authStrategy: new LocalAuth({
         clientId: "YOUR_CLIENT_ID"
