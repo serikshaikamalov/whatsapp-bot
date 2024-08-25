@@ -1,16 +1,11 @@
 
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal')
-// const express = require('express')
+const express = require('express')
 
-// const app = express()
-// const port = 3001
-
-// const allSessionsObject = {}
-
-// app.listen(port, () => {
-//     console.log(`   Whatsapp server is ready: ${port}`)
-// })
+const globals = {
+    qrCode: null
+}
 
 const client = new Client({
     puppeteer: {
@@ -25,7 +20,8 @@ const client = new Client({
 client.on('qr', (qr) => {
     // Generate and scan this code with your phone
     console.log('QR RECEIVED', qr);
-    qrcode.generate(qr, { small: true })
+    // qrcode.generate(qr, { small: true })
+    globals.qrCode = qr
 });
 
 
@@ -39,4 +35,42 @@ client.on('message', msg => {
     }
 });
 
-client.initialize();
+
+const app = express()
+const port = 3001
+
+app.get('/api/connect', async (req, res) => {
+    res.json({ qrCode: globals.qrCode })
+})
+
+app.get('/api/send-message', async (req, res) => {
+    const { password, phone } = req.query
+
+    try {
+        if (client.info) {
+            // const chatID = phone + `@c.us`
+            const text = `Welcome to HajjTravel. Here is your password ${password}`
+
+            const number_details = await client.getNumberId(phone)
+            if (number_details) {
+                const response = await client.sendMessage(number_details._serialized, text)
+                console.log('Response of sending: ', response)
+                res.json({ password, phone, chatID, text, number_details })
+            } else {
+                throw new Error('Mobile number is not registered')
+            }
+        } else {
+            throw new Error('Client is not found')
+        }
+    } catch (ex) {
+        console.error(`Send message ex: `, ex);
+
+        res.json(ex?.message)
+    }
+})
+
+app.listen(port, () => {
+    console.log(`Whatsapp server is ready: ${port}`)
+
+    client.initialize();
+})
