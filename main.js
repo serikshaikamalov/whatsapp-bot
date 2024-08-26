@@ -44,12 +44,12 @@ app.get('/api/connect', async (req, res) => {
 })
 
 app.get('/api/send-message', async (req, res) => {
-    const { password, phone } = req.query
+    const { password, phone, text } = req.query
 
     try {
         if (client.info) {
             // const chatID = phone + `@c.us`
-            const text = `Welcome to HajjTravel. Here is your password ${password}`
+            // const text = `Welcome to HajjTravel. Here is your password ${password}`
 
             const number_details = await client.getNumberId(phone)
             if (number_details) {
